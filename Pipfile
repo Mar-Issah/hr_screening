@@ -10,7 +10,6 @@ openai = "*"
 tiktoken = "==0.5.2"
 python-dotenv = "==1.0.0"
 unstructured = "==0.11.5"
-pinecone-client = "==2.2.4"
 pypdf = "==3.17.2"
 sentence-transformers = "==2.2.2"
 

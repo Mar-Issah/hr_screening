@@ -1,18 +1,20 @@
-# from langchain.vectorstores import Pinecone
+from langchain.vectorstores import Pinecone as pinecone_vs
+# from pinecone import Pinecone
 # from langchain.llms import OpenAI
 from langchain.embeddings.sentence_transformer import SentenceTransformerEmbeddings
-# from langchain.schema import Document
 from langchain_core.documents import Document
 # import pinecone
 from pypdf import PdfReader
 # # from langchain.llms.openai import OpenAI
 # from langchain.chains.summarize import load_summarize_chain
 # from langchain.llms import HuggingFaceHub
-
+from langchain_pinecone import PineconeVectorStore
+import os
 # import time
 
+pinecone_api_key=os.environ["PINECONE_API_KEY"]
 
-# #Extract Information from PDF file
+# Extract Information from PDF file
 def get_pdf_text(pdf_doc):
     text = ""
     pdf_reader = PdfReader(pdf_doc)
@@ -22,8 +24,8 @@ def get_pdf_text(pdf_doc):
 
 
 
-# # iterate over files in
-# # that user uploaded PDF files, one by one
+# iterate over files in
+# that user uploaded PDF files, one by one
 def create_docs(user_pdf_list, unique_id):
     docs=[]
     for filename in user_pdf_list:
@@ -38,55 +40,40 @@ def create_docs(user_pdf_list, unique_id):
     return docs
 
 
-# #Create embeddings instance
+#Create embeddings instance
 def create_embeddings_load_data():
     #embeddings = OpenAIEmbeddings()
     embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
     return embeddings
 
 
-# #Function to push data to Vector Store - Pinecone here
-# def push_to_pinecone(pinecone_apikey,pinecone_environment,pinecone_index_name,embeddings,docs):
+# Function to push data to Vector Store - Pinecone here
+def push_to_pinecone(pinecone_index_name,embeddings):
+   # Pinecone has eliminated .init method
+    # Pinecone(api_key=pinecone_api_key)
+    index = PineconeVectorStore.from_documents(pinecone_index_name, embeddings)
+    return index
 
-#     pinecone.init(
-#     api_key=pinecone_apikey,
-#     environment=pinecone_environment
-#     )
+def similarity(query, docsearch):
+     docs = docsearch.similarity_search(query)
+     print(docs[0].page_content)
+     return docs
 
-#     Pinecone.from_documents(docs, embeddings, index_name=pinecone_index_name)
-
-
-
-# #Function to pull infrmation from Vector Store - Pinecone here
-# def pull_from_pinecone(pinecone_apikey,pinecone_environment,pinecone_index_name,embeddings):
-#     # For some of the regions allocated in pinecone which are on free tier, the data takes upto 10secs for it to available for filtering
-#     #so I have introduced 20secs here, if its working for you without this delay, you can remove it :)
-#     #https://docs.pinecone.io/docs/starter-environment
-#     print("20secs delay...")
-#     time.sleep(20)
-#     pinecone.init(
-#     api_key=pinecone_apikey,
-#     environment=pinecone_environment
-#     )
-
+#Function to pull infrmation from Vector Store - Pinecone here
+# def pull_from_pinecone(pinecone_index_name,embeddings):
+#     Pinecone(api_key=pinecone_api_key)
 #     index_name = pinecone_index_name
-
-#     index = Pinecone.from_existing_index(index_name, embeddings)
+#     index = pinecone_vs.from_existing_index(index_name, embeddings)
 #     return index
 
 
 
-# #Function to help us get relavant documents from vector store - based on user input
-# def similar_docs(query,k,pinecone_apikey,pinecone_environment,pinecone_index_name,embeddings,unique_id):
-
-#     pinecone.init(
-#     api_key=pinecone_apikey,
-#     environment=pinecone_environment
-#     )
-
+# Function to help us get relavant documents from vector store - based on user input
+# def similar_docs(query,k,pinecone_index_name,embeddings,unique_id):
+#     Pinecone(api_key=pinecone_api_key)
 #     index_name = pinecone_index_name
 
-#     index = pull_from_pinecone(pinecone_apikey,pinecone_environment,index_name,embeddings)
+#     # index = pull_from_pinecone(index_name,embeddings)
 #     similar_docs = index.similarity_search_with_score(query, int(k),{"unique_id":unique_id})
 #     #print(similar_docs)
 #     return similar_docs

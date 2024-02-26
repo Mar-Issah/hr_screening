@@ -38,20 +38,21 @@ def main():
                 st.session_state['unique_id'] = uuid.uuid4().hex
 
                 # Create a list of documents from uploaded PDF files
-                final_docs_list = create_docs(pdf, st.session_state['unique_id'])
+                docs = create_docs(pdf, st.session_state['unique_id'])
 
                 # Display the count of uploaded resumes
-                st.write("*Resumes uploaded* :" + str(len(final_docs_list)))
+                st.write("*Resumes uploaded* :" + str(len(docs)))
 
                 # Create embeddings instance
                 embeddings = create_embeddings_load_data()
-                st.write('embedding done')
 
                 # Push data to Pinecone
-                # push_to_pinecone("71adf081-aace-4ee4-be84-0a9076ad361e", "gcp-starter", "test", embeddings, final_docs_list)
+                docsearch = push_to_pinecone(embeddings, docs)
 
                 # Fetch relevant documents from Pinecone
                 # relevant_docs = similar_docs(job_description, document_count, "71adf081-aace-4ee4-be84-0a9076ad361e", "gcp-starter", "test", embeddings, st.session_state['unique_id'])
+                rel = similarity(job_description, docsearch)
+                st.write(rel)
 
                 # Display a line separator
                 st.write(":heavy_minus_sign:" * 30)
