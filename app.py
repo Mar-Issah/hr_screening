@@ -3,70 +3,73 @@ from dotenv import load_dotenv
 from utils import *
 import uuid
 
-#Creating session variables
+# Load environment variables
+load_dotenv()
+
+# Creating session variables
 if 'unique_id' not in st.session_state:
-    st.session_state['unique_id'] =''
+    st.session_state['unique_id'] = ''
 
 def main():
-    load_dotenv()
-
-    st.set_page_config(page_title="Resume Screening Assistance")
+    st.set_page_config(page_title="Resume Screening Assistance", page_icon="📝")
     st.title("HR - Resume Screening Assistance...💁 ")
-    st.subheader("I can help you in resume screening process")
+    st.subheader("I can help you in the resume screening process")
 
-    job_description = st.text_area("Please paste the 'JOB DESCRIPTION' here...",key="1")
-    document_count = st.text_input("No. of 'RESUMES' to return", key="2")
-    # Upload the Resumes (pdf files)
-    pdf = st.file_uploader("Upload resumes here, only PDF files allowed", type=["pdf"],accept_multiple_files=True)
+    # Text area for job description
+    job_description = st.text_area("Please paste the 'JOB DESCRIPTION' here", key="desc", placeholder="Python developer")
 
-    submit=st.button("ANALYZE")
+    # Text input for number of resumes to return
+    document_count = st.text_input("No. of 'RESUMES' to return", key="count", placeholder="3")
+
+    # Upload resumes
+    pdf = st.file_uploader("Upload resumes here, only PDF files allowed", type=["pdf"], accept_multiple_files=True)
+
+	# Enable the button only if all inputs are filled
+    submit = False
+    if job_description and document_count and pdf:
+        submit = st.button("ANALYZE")
+    else:
+        st.warning("Please fill in all the inputs to enable analysis.")
 
     if submit:
         with st.spinner('Wait for it...'):
+            try:
+                # Create a unique ID for this session
+                st.session_state['unique_id'] = uuid.uuid4().hex
 
-            #Creating a unique ID, so that we can use to query and get only the user uploaded documents from PINECONE vector store
-            st.session_state['unique_id']=uuid.uuid4().hex
+                # Create a list of documents from uploaded PDF files
+                final_docs_list = create_docs(pdf, st.session_state['unique_id'])
 
-            #Create a documents list out of all the user uploaded pdf files
-            final_docs_list=create_docs(pdf,st.session_state['unique_id'])
+                # Display the count of uploaded resumes
+                st.write("*Resumes uploaded* :" + str(len(final_docs_list)))
 
-            #Displaying the count of resumes that have been uploaded
-            st.write("*Resumes uploaded* :"+str(len(final_docs_list)))
+                # Create embeddings instance
+                embeddings = create_embeddings_load_data()
+                st.write('embedding done')
 
-            #Create embeddings instance
-            embeddings=create_embeddings_load_data()
+                # Push data to Pinecone
+                # push_to_pinecone("71adf081-aace-4ee4-be84-0a9076ad361e", "gcp-starter", "test", embeddings, final_docs_list)
 
-            #Push data to PINECONE
-            push_to_pinecone("71adf081-aace-4ee4-be84-0a9076ad361e","gcp-starter","test",embeddings,final_docs_list)
+                # Fetch relevant documents from Pinecone
+                # relevant_docs = similar_docs(job_description, document_count, "71adf081-aace-4ee4-be84-0a9076ad361e", "gcp-starter", "test", embeddings, st.session_state['unique_id'])
 
-            #Fecth relavant documents from PINECONE
-            relavant_docs=similar_docs(job_description,document_count,"71adf081-aace-4ee4-be84-0a9076ad361e","gcp-starter","test",embeddings,st.session_state['unique_id'])
+                # Display a line separator
+                st.write(":heavy_minus_sign:" * 30)
 
-            #t.write(relavant_docs)
+                # Display relevant documents
+                # for index, doc_info in enumerate(relevant_docs, start=1):
+                #     st.subheader(f"👉 Document {index}")
+                #     st.write("**File** : " + doc_info[0].metadata['name'])
 
-            #Introducing a line separator
-            st.write(":heavy_minus_sign:" * 30)
+                    # Expander to show more details
+                    # with st.expander('Show me 👀'):
+                    #     st.info("**Match Score** : " + str(doc_info[1]))
+                    #     summary = get_summary(doc_info[0])  # Get summary using LLM
+                    #     st.write("**Summary** : " + summary)
+            except Exception as e:
+                st.error(f"An error occurred: {str(e)}")
+        st.success("Thank you! I hope you found the right candidate.❤️")
 
-            #For each item in relavant docs - we are displaying some info of it on the UI
-            for item in range(len(relavant_docs)):
-
-                st.subheader("👉 "+str(item+1))
-
-                #Displaying Filepath
-                st.write("**File** : "+relavant_docs[item][0].metadata['name'])
-
-                #Introducing Expander feature
-                with st.expander('Show me 👀'):
-                    st.info("**Match Score** : "+str(relavant_docs[item][1]))
-                    #st.write("***"+relavant_docs[item][0].page_content)
-
-                    #Gets the summary of the current item using 'get_summary' function that we have created which uses LLM & Langchain chain
-                    summary = get_summary(relavant_docs[item][0])
-                    st.write("**Summary** : "+summary)
-
-        st.success("Hope I was able to save your time❤️")
-
-
-#Invoking main function
+# # Invoking main function
 if __name__ == '__main__':
     main()
