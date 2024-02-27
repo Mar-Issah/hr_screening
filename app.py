@@ -12,14 +12,14 @@ if 'unique_id' not in st.session_state:
 
 def main():
     st.set_page_config(page_title="Resume Screening Assistance", page_icon="📝")
-    st.title("HR - Resume Screening Assistance...💁 ")
+    st.title("HR - Resume Screening Assistance 💁")
     st.subheader("I can help you in the resume screening process")
 
     # Text area for job description
-    job_description = st.text_area("Please paste the 'JOB DESCRIPTION' here", key="desc", placeholder="Python developer")
+    job_description = st.text_area("Please paste the 'JOB DESCRIPTION' here", key="1")
 
     # Text input for number of resumes to return
-    document_count = st.text_input("No. of 'RESUMES' to return", key="count", placeholder="3")
+    document_count = st.text_input("No. of 'RESUMES' to return", key="2", placeholder="2")
 
     # Upload resumes
     pdf = st.file_uploader("Upload resumes here, only PDF files allowed", type=["pdf"], accept_multiple_files=True)
@@ -34,27 +34,29 @@ def main():
     if submit:
         with st.spinner('Wait for it...'):
             try:
-                # Create a unique ID for this session
-                st.session_state['unique_id'] = uuid.uuid4().hex
+                # Create a unique ID for this session to filtrer out the uploaded
+                st.session_state['unique_id'] = str(uuid.uuid4().hex)
 
                 # Create a list of documents from uploaded PDF files
                 docs = create_docs(pdf, st.session_state['unique_id'])
-
-                # Display the count of uploaded resumes
+                st.write(st.session_state['unique_id'])
                 st.write("*Resumes uploaded* :" + str(len(docs)))
 
                 # Create embeddings instance
                 embeddings = create_embeddings_load_data()
 
                 # Push data to Pinecone
-                docsearch = push_to_pinecone(embeddings, docs)
+                docsearch = push_to_pinecone(docs, embeddings)
+                relevant_docs = mmr_search(docsearch, job_description, st.session_state['unique_id'])
 
                 # Fetch relevant documents from Pinecone
-                # relevant_docs = similar_docs(job_description, document_count, "71adf081-aace-4ee4-be84-0a9076ad361e", "gcp-starter", "test", embeddings, st.session_state['unique_id'])
-                rel = similarity(job_description, docsearch)
-                st.write(rel)
+                # relevant_docs = similar_docs(job_description, document_count, embeddings, st.session_state['unique_id'])
+                # relevant_docs = similarity(job_description, docsearch)
+                # relevant_docs = similarity(job_description,docsearch,document_count, st.session_state['unique_id'])
+                # st.write(docsearch)
+                st.write(relevant_docs)
 
-                # Display a line separator
+				# line seperator
                 st.write(":heavy_minus_sign:" * 30)
 
                 # Display relevant documents
@@ -67,10 +69,11 @@ def main():
                     #     st.info("**Match Score** : " + str(doc_info[1]))
                     #     summary = get_summary(doc_info[0])  # Get summary using LLM
                     #     st.write("**Summary** : " + summary)
+                st.success("I hope you found the right candidate.❤️")
             except Exception as e:
                 st.error(f"An error occurred: {str(e)}")
-        st.success("Thank you! I hope you found the right candidate.❤️")
 
-# # Invoking main function
+
+# Invoking main function
 if __name__ == '__main__':
     main()
