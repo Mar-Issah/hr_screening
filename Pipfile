@@ -15,7 +15,6 @@ sentence-transformers = "==2.2.2"
 langchain-pinecone = "*"
 pinecone-client = "*"
 langchain-community = "*"
-faiss-cpu = "*"
 
 [dev-packages]
 

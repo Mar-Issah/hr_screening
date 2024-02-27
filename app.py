@@ -12,7 +12,7 @@ if "unique_id'" not in st.session_state:
 
 def main():
     st.set_page_config(page_title="Resume Screening Assistance", page_icon="📝")
-    st.title("Resume Screening Assistance 💁")
+    st.title("Resume Screening Assistance")
 
     # Text area for job description
     job_description = st.text_area("Enter the 'JOB DESCRIPTION' here", key="1")
