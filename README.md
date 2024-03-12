@@ -1,4 +1,4 @@
-# hr screening
+# hr screening assistance
 
 LangChain | Openai | SentenceTransformerEmbeddings | RAG | Pinecone
 
