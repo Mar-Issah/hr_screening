@@ -1,4 +1,4 @@
-# hr_screening
+# hr screening
 
 LangChain | Openai | SentenceTransformerEmbeddings | RAG | Pinecone
 
