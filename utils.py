@@ -1,7 +1,7 @@
 from langchain.embeddings.sentence_transformer import SentenceTransformerEmbeddings
 from langchain_core.documents import Document
 from pypdf import PdfReader
-from langchain.llms.openai import OpenAI
+from langchain_openai import OpenAI
 from langchain.chains.summarize import load_summarize_chain
 # from langchain.llms import HuggingFaceHub
 from langchain_pinecone import PineconeVectorStore
