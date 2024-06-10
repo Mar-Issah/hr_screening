@@ -44,7 +44,8 @@ def main():
                 embeddings = create_embeddings_load_data()
 
                 # Push data to Pinecone
-                docsearch = push_to_pinecone(docs, embeddings)
+                # docsearch = push_to_pinecone(docs, embeddings)
+                docsearch = push_to_chromadb(docs, embeddings)
                 relevant_docs = similarity_search(docsearch, job_description,document_count, st.session_state["unique_id"])
 
                 # st.write(relevant_docs)

@@ -7,6 +7,7 @@ from langchain.chains.summarize import load_summarize_chain
 from langchain_pinecone import PineconeVectorStore
 import os
 import time
+from langchain_chroma import Chroma
 
 pinecone_api_key = os.environ.get("PINECONE_API_KEY")
 pinecone_index_name=os.environ.get("PINECONE_INDEX_NAME")
@@ -39,13 +40,15 @@ def create_embeddings_load_data():
     embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
     return embeddings
 
-#old
 def push_to_pinecone(docs, embeddings):
     # Pinecone(api_key=pinecone_api_key)
     index_name = pinecone_index_name
     index = PineconeVectorStore.from_documents(docs, embeddings, index_name=index_name)
     return index
 
+def push_to_chromadb(docs, embeddings):
+    db = Chroma.from_documents(docs, embeddings)
+    return db
 
 #Function to help us get relavant documents from vector store - based on user input
 def similarity_search(docsearch,query,k,unique_id):
