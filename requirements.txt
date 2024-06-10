@@ -9,3 +9,4 @@ unstructured==0.11.5
 pinecone-client
 pypdf==3.17.2
 sentence-transformers==2.2.2
+langchain-chroma
