@@ -1,4 +1,4 @@
-# hr_screening
+# HR Resume Screening Assistance
 
 LangChain | Openai | SentenceTransformerEmbeddings | RAG | Pinecone
 
